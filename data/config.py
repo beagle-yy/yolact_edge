@@ -805,7 +805,7 @@ yolact_base_config = coco_base_config.copy({
     'use_tensorrt_safe_mode': False,
 })
 
-yolact_edge_config = yolact_base_config.copy({
+yolact_edge_config = yolact_resnet50_config.copy({
     'name': 'yolact_edge',
     'torch2trt_max_calibration_images': 100,
     'torch2trt_backbone_int8': True,
