@@ -230,7 +230,23 @@ youtube_vis_dataset = dataset_base.copy({
     'is_video': True
 })
 
+trunk_cordon_dataset = dataset_base.copy({
+	'name': 'Vineyard Dataset',
 
+    'train_images': '/content/drive/MyDrive/mask_rcnn/trunk_cordon/train/',
+    'train_info':   '/content/drive/MyDrive/mask_rcnn/trunk_cordon/train/trunk_cordon_train.json',
+
+    'valid_images': '/content/drive/MyDrive/mask_rcnn/trunk_cordon/val/',
+    'valid_info':   '/content/drive/MyDrive/mask_rcnn/trunk_cordon/val/trunk_cordon_val.json',
+
+    'has_gt': True,
+    'class_names': ('trunk', 'cordon'),
+
+    # below is only needed for YTVIS-style video dataset.
+
+    'is_video': False,
+    'label_map': {3:1, 1:2}
+})
 
 
 
@@ -796,6 +812,8 @@ yolact_edge_config = yolact_base_config.copy({
     'torch2trt_protonet_int8': True,
     'torch2trt_fpn': True,
     'torch2trt_prediction_module': True,
+	'dataset': trunk_cordon_dataset,
+	'num_classes':3
 })
 
 yolact_edge_mobilenetv2_config = yolact_edge_config.copy({
