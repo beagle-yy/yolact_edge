@@ -921,6 +921,8 @@ yolact_resnet50_config = yolact_base_config.copy({
         'preapply_sqrt': False,
         'use_square_anchors': True, # This is for backward compatability with a bug
     }),
+	'dataset': trunk_cordon_dataset,
+	'num_classes':3
 })
 
 yolact_resnet152_config = yolact_base_config.copy({
