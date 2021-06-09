@@ -249,6 +249,22 @@ trunk_cordon_dataset = dataset_base.copy({
 })
 
 
+cordon_yard_dataset = dataset_base.copy({
+	'name': 'Cordon Backyard Dataset',
+
+    'train_images': '/content/drive/MyDrive/yolact_edge/images/cordon_yard/',
+    'train_info':   '/content/drive/MyDrive/yolact_edge/images/cordon_yard/cordon_yard.json',
+
+    'valid_images': '/content/drive/MyDrive/yolact_edge/images/cordon_yard/',
+    'valid_info':   '/content/drive/MyDrive/yolact_edge/images/cordon_yard/cordon_yard.json',
+
+    'has_gt': True,
+    'class_names': ('trunk', 'cordon'),
+
+
+    'is_video': False,
+    'label_map': {3:1, 1:2}
+})
 
 
 # ----------------------- TRANSFORMS ----------------------- #
@@ -812,7 +828,7 @@ yolact_edge_config = yolact_base_config.copy({
     'torch2trt_protonet_int8': True,
     'torch2trt_fpn': True,
     'torch2trt_prediction_module': True,
-	'dataset': trunk_cordon_dataset,
+	'dataset': cordon_yard_dataset,
 	'num_classes':3
 })
 
