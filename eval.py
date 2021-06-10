@@ -681,7 +681,12 @@ def evalvideo(net:Yolact, path:str):
         exit()
 
     def get_next_frame(vid):
-        return [vid.read()[1] for _ in range(args.video_multiframe)]
+        return_array = []
+        for _ in range(args.video_multiframe):
+            ret, frame = vid.read()
+            left_right_image = np.split(frame,2,axis=1)
+            return_array.append(left_right_image[0]) #use right image only
+        return return_array
 
     def transform_frame(frames):
         with torch.no_grad():
