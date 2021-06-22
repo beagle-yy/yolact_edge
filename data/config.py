@@ -252,11 +252,11 @@ trunk_cordon_dataset = dataset_base.copy({
 cordon_quad_objects_dataset = dataset_base.copy({
 	'name': 'Cordon Quad Object Dataset',
 
-    'train_images': '/content/drive/MyDrive/yolact_edge/images/quad_object/',
-    'train_info':   '/content/drive/MyDrive/yolact_edge/images/quad_object/quad_object.json',
+    'train_images': '/content/drive/MyDrive/yolact_edge/images/quad_objects/',
+    'train_info':   '/content/drive/MyDrive/yolact_edge/images/quad_objects/quad_objects.json',
 
-    'valid_images': '/content/drive/MyDrive/yolact_edge/images/quad_object/',
-    'valid_info':   '/content/drive/MyDrive/yolact_edge/images/quad_object/quad_object.json',
+    'valid_images': '/content/drive/MyDrive/yolact_edge/images/quad_objects/',
+    'valid_info':   '/content/drive/MyDrive/yolact_edge/images/quad_objects/quad_objects.json',
 
     'has_gt': True,
     'class_names': ('trunk', 'cordon', 'wire', 'post'),
