@@ -33,6 +33,10 @@ import logging
 import math
 
 from utils.tensorrt import convert_to_tensorrt
+#import sys
+#sys.path.append('/home/beagle/beagle_pruning/')
+#import PositionGenerator
+import serial
 
 def str2bool(v):
     if v.lower() in ('yes', 'true', 't', 'y', '1'):
@@ -207,6 +211,36 @@ def prep_display(dets_out, img, h, w, undo_transform=True, class_color=False, ma
     # Beware: very fast but possibly unintelligible mask-drawing code ahead
     # I wish I had access to OpenGL or Vulkan but alas, I guess Pytorch tensor operations will have to suffice
     if args.display_masks and cfg.eval_mask_branch:
+        #Update position profile
+        cordon_index = (t[0] == 1)  #select class = cordon
+        current_proc_time = time.process_time()
+        if (torch.sum(cordon_index) > 0): 
+            #import pdb; pdb.set_trace()
+            cordon_masks = masks[cordon_index,:,:]
+            cordon_masks_aggregate = torch.any(cordon_masks,dim=0)
+            middle = int(cordon_masks_aggregate.shape[1]/2)
+            column = cordon_masks_aggregate[:,middle]
+            if torch.sum(column) > 0:
+                idx = torch.arange(column.shape[0],0,-1)
+                tmp = column * idx
+                set_height = int(torch.argmax(tmp,0,keepdim=False)) #find highest occurance of mask
+                shift = float(cordon_masks_aggregate.shape[0])/2.0 - set_height
+                #if (shift != 0) :
+                if (abs(shift) >1) :  #only move actuator is difference is greater than 5 pixels
+                    new_position = 100 + int(shift * 255 / cordon_masks_aggregate.shape[0]) #scale shift amount by ratio of video height with 255
+                    if (new_position < 0):
+                        new_position = 0
+                    if (new_position > 255):
+                        new_position = 255 
+                    actuator_position = new_position
+                    #print('\rActuator Position: %d   ' % (actuator_position), end='')
+                    #print('Actuator Position: %d   ' % (actuator_position))
+                    command_string = "BGPC" + "{:0>3d}".format(new_position)
+                    arduino.write(command_string.encode())
+                img_gpu[set_height,:,:]=5
+            #positions = posGen.updateFrame(cordon_masks_aggregate)
+            #middle = int(len(positions)/2)
+            #Draw position line
         # After this, mask is of size [num_dets, h, w, 1]
         masks = masks[:num_dets_to_consider, :, :, None]
         
@@ -227,11 +261,12 @@ def prep_display(dets_out, img, h, w, undo_transform=True, class_color=False, ma
             masks_color_summand += masks_color_cumul.sum(dim=0)
 
         img_gpu = img_gpu * inv_alph_masks.prod(dim=0) + masks_color_summand
+
         
     # Then draw the stuff that needs to be done on the cpu
     # Note, make sure this is a uint8 tensor or opencv will not anti alias text for whatever reason
     img_numpy = (img_gpu * 255).byte().cpu().numpy()
-    
+   
     if args.display_text or args.display_bboxes:
         for j in reversed(range(num_dets_to_consider)):
             x1, y1, x2, y2 = boxes[j, :]
@@ -661,6 +696,11 @@ def evalvideo(net:Yolact, path:str):
         print('Could not open video "%s"' % path)
         exit(-1)
     
+    video_width = int(vid.get(cv2.CAP_PROP_FRAME_WIDTH)/2)  #since we are using only right camera
+    video_height = int(vid.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    #global posGen
+    #posGen = PositionGenerator.PositionGenerator(width_pixels = video_width, height_pixels = video_height)   
+
     net = CustomDataParallel(net).cuda()
     transform = torch.nn.DataParallel(FastBaseTransform()).cuda()
     frame_times = MovingAverage(400)
@@ -784,8 +824,10 @@ def evalvideo(net:Yolact, path:str):
     inference_times = []
 
     print()
+
     while vid.isOpened() and running:
         start_time = time.time()
+
 
         # Start loading the next frames from the disk
         next_frames = pool.apply_async(get_next_frame, args=(vid,))
@@ -814,6 +856,7 @@ def evalvideo(net:Yolact, path:str):
                 frame['value'] = extract_frame(frame['value'], 0)
 
         
+        #import pdb; pdb.set_trace()
         # Finish loading in the next frames and add them to the processing queue
         active_frames.append({'value': next_frames.get(), 'idx': len(sequence)-1})
         
@@ -824,7 +867,7 @@ def evalvideo(net:Yolact, path:str):
         fps = args.video_multiframe / frame_times.get_avg()
         np.save(args.video, np.asarray(inference_times))
 
-        print('\rProcessing FPS: %.2f | Video Playback FPS: %.2f | Frames in Buffer: %d    ' % (fps, video_fps, frame_buffer.qsize()), end='')
+        #print('\rProcessing FPS: %.2f | Video Playback FPS: %.2f | Frames in Buffer: %d | Actuator Position: %d   ' % (fps, video_fps, frame_buffer.qsize(), actuator_position), end='')
     
     cleanup_and_exit()
 
@@ -1267,6 +1310,16 @@ if __name__ == '__main__':
             prep_coco_cats()
         else:
             dataset = None
+
+        print("Setting up arduino...")
+
+        global arduino
+        arduino = serial.Serial(port='/dev/ttyACM0', baudrate=115200)
+        arduino.flushInput()
+        arduino.flushOutput()
+        global actuator_position
+        actuator_position = 400
+
 
         logger.info('Loading model...')
         net = Yolact(training=False)
