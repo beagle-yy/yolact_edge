@@ -249,21 +249,21 @@ trunk_cordon_dataset = dataset_base.copy({
 })
 
 
-cordon_yard_dataset = dataset_base.copy({
-	'name': 'Cordon Backyard Dataset',
+cordon_quad_objects_dataset = dataset_base.copy({
+	'name': 'Cordon Quad Object Dataset',
 
-    'train_images': '/content/drive/MyDrive/yolact_edge/images/cordon_yard/',
-    'train_info':   '/content/drive/MyDrive/yolact_edge/images/cordon_yard/cordon_yard.json',
+    'train_images': '/content/drive/MyDrive/yolact_edge/images/quad_objects/',
+    'train_info':   '/content/drive/MyDrive/yolact_edge/images/quad_objects/quad_objects.json',
 
-    'valid_images': '/content/drive/MyDrive/yolact_edge/images/cordon_yard/',
-    'valid_info':   '/content/drive/MyDrive/yolact_edge/images/cordon_yard/cordon_yard.json',
+    'valid_images': '/content/drive/MyDrive/yolact_edge/images/quad_objects/',
+    'valid_info':   '/content/drive/MyDrive/yolact_edge/images/quad_objects/quad_objects.json',
 
     'has_gt': True,
-    'class_names': ('trunk', 'cordon'),
+    'class_names': ('trunk', 'cordon', 'wire', 'post'),
 
 
     'is_video': False,
-    'label_map': {3:1, 1:2}
+    'label_map': {3:1, 1:2, 4:3, 5:4}
 })
 
 
@@ -828,8 +828,8 @@ yolact_edge_config = yolact_base_config.copy({
     'torch2trt_protonet_int8': True,
     'torch2trt_fpn': True,
     'torch2trt_prediction_module': True,
-	'dataset': cordon_yard_dataset,
-	'num_classes':3
+	'dataset': cordon_quad_objects_dataset,
+	'num_classes':5
 })
 
 yolact_edge_mobilenetv2_config = yolact_edge_config.copy({
