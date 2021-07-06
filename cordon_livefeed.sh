@@ -1,0 +1,1 @@
+python3 eval.py --use_tensorrt_safe_mode --trained_model=/home/beagle/model_weights/yolact_edge_cordon_backyard_199_200.pth --config=yolact_edge_resnet50_config --score_threshold=0.3 --top_k=100 --video_multiframe=4 --trt_batch_size 4 --video=0
